@@ -86,3 +86,38 @@ def three_water_level(idlist: list[str] = Query(...), start: int = Query(...)):
         "stages": multiple_stages,
         "dates": multiple_dates
     }
+
+@app.get("/api/fetch_less_points")
+def fetch_less_points(idlist: list[str] = Query(...), start: int = Query(...)):
+    end = int(datetime.now().timestamp())
+    multiple_stages = []
+    multiple_dates = []
+
+    for id in idlist:
+        params = {
+        "id": id,
+        "start": start,
+        "end": end
+        }
+
+        response = requests.get(f"{BASE_URL}/site/messages", headers=headers, params=params)
+        messages = response.json()
+        stage_list = []
+        event_date_list = []
+        for message in messages:
+            event_date = message.get('eventDate')
+            senix = message.get('senix')
+
+            dt = datetime.fromisoformat(event_date.replace("Z", "+00:00"))
+            if dt.minute == 0:
+                stage_list.append(senix['mm'])
+                event_date_list.append(event_date)
+
+        multiple_stages.append(stage_list)
+        multiple_dates.append(event_date_list)
+    
+    return {
+        "ids": idlist,
+        "stages": multiple_stages,
+        "dates": multiple_dates
+    }
