@@ -41,6 +41,15 @@ time_offsets = {
     "24h": int((now - timedelta(hours=24)).timestamp())
 }
 
+@app.get("/sites")
+def get_sites():
+    response = requests.get(f"{BASE_URL}/sites", headers=headers)
+    sites = response.json()
+    if not isinstance(sites, list):
+        raise RuntimeError(f"GreenStream API error ({response.status_code}): {sites}")
+
+    return [{"id": site.get("id"), "name": site.get("name")} for site in sites]
+
 @app.get("/water_level")
 def get_water_level(id, start):
     end = int(datetime.now().timestamp())
@@ -53,6 +62,9 @@ def get_water_level(id, start):
 
     response = requests.get(f"{BASE_URL}/site/messages", headers=headers, params=params)
     messages = response.json()
+    if not isinstance(messages, list):
+        raise RuntimeError(f"GreenStream API error ({response.status_code}): {messages}")
+
     stage_list = []
     event_date_list = []
     for message in messages:
@@ -60,7 +72,7 @@ def get_water_level(id, start):
         event_date = message.get('eventDate')
         stage_list.append(stage)
         event_date_list.append(event_date)
-    
+
     return stage_list, event_date_list
 
 @app.get("/api/three_water_level")
@@ -93,3 +105,15 @@ def three_water_level(idlist: list[str] = Query(...), start: int = Query(...)):
         "stages": multiple_stages,
         "dates": multiple_dates
     }
+
+if __name__ == "__main__":
+    print("API key loaded:", bool(API_KEY))
+
+    test_site_id = "9ad953f0-2259-47e4-9d16-f46fea05badc"  # Country Club Creek at Marine Science Center
+    stages, dates = get_water_level(test_site_id, time_offsets["24h"])
+    print(f"Got {len(stages)} readings for site {test_site_id}")
+    print("Most recent stage:", stages[-1] if stages else None)
+    print("Most recent event date:", dates[-1] if dates else None)
+
+
+print(get_water_level("9ad953f0-2259-47e4-9d16-f46fea05badc",time_offsets["24h"]))
