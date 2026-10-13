@@ -33,13 +33,6 @@ headers = {
 
 now = datetime.now()
 
-time_offsets = {
-    "1h": int((now - timedelta(hours=1)).timestamp()),
-    "3h": int((now - timedelta(hours=3)).timestamp()),
-    "6h": int((now - timedelta(hours=6)).timestamp()),
-    "12h": int((now - timedelta(hours=12)).timestamp()),
-    "24h": int((now - timedelta(hours=24)).timestamp())
-}
 
 @app.get("/water_level")
 def get_water_level(id, start):
@@ -81,9 +74,9 @@ def three_water_level(idlist: list[str] = Query(...), start: int = Query(...)):
         stage_list = []
         event_date_list = []
         for message in messages:
-            stage = message.get('stage')
+            senix = message.get('senix')
             event_date = message.get('eventDate')
-            stage_list.append(stage)
+            stage_list.append(senix['mm'])
             event_date_list.append(event_date)
         multiple_stages.append(stage_list)
         multiple_dates.append(event_date_list)
