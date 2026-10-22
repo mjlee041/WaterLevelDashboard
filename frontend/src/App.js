@@ -3,13 +3,6 @@ import Chart from 'react-apexcharts';
 import SensorSelector, { AVAILABLE_SENSORS } from './components/SensorSelector';
 import TimeRangeSelector, { TIME_RANGES } from './components/TimeRangeSelector';
 
-const TIMES = {
-  '24h': Math.floor(Date.now() / 1000) - (24 * 60 * 60),
-  '2d': Math.floor(Date.now() / 1000) - (2 * 24 * 60 * 60),
-  '3d': Math.floor(Date.now() / 1000) - (3 * 24 * 60 * 60),
-  '4d': Math.floor(Date.now() / 1000) - (4 * 24 * 60 * 60),
-}
-
 const COMPARISON_COLORS = ["#2563eb", "#dc2626", "#16a34a"];
 
 function App() {
