@@ -1,58 +1,8 @@
 import React from 'react';
 
-export const AVAILABLE_SENSORS = [
-    {
-      id: "30440647-4152-4dea-94b6-c623a4c76eb4",
-      name: "Burnside Island at Hunt Drive",
-    },
-    {
-      id: "9ad953f0-2259-47e4-9d16-f46fea05badc",
-      name: "Country Club Creek at Marine Science Center",
-    },
-    {
-      id: "867c5ecb-6b7b-4d78-8c11-933d71704df0",
-      name: "Herb River at La Roche Avenue",
-    },
-    {
-      id: "f1571f66-5b53-4767-81a1-d3f0daa6c573",
-      name: "Hwy 21 at St Augustine Creek",
-    },
-    {
-      id: "ffc52330-32a7-4996-b78d-49bb8ddc39dd",
-      name: "Hwy 25 at Dundee Creek",
-    },
-    {
-      id: "92279f85-e876-4f43-8e8b-38e36a213dd5",
-      name: "Kilkenny Creek",
-    },
-    {
-      id: "9cfeef25-f451-4e05-84a0-abf588601ac2",
-      name: "Ossabaw Island at Ogeechee River",
-    },
-    {
-      id: "6a79c2e0-62b9-4a70-acf4-80117cc3d2f3",
-      name: "O’Leary Road at Black Creek",
-    },
-    {
-      id: "d5cd5d7d-3e7e-4ce5-8742-88fa440cf1fa",
-      name: "Skidaway Institute Dock",
-    },
-    {
-      id: "05b03e11-aea9-4d74-a4fa-dd9b557a8025",
-      name: "Turner Creek Boat Ramp",
-    },
-    {
-      id: "9cb2d88e-2b29-4b97-bf51-fc786bf06762",
-      name: "Tybee Island at Burton 4H Center",
-    },
-    {
-      id: "6c891fca-c758-470e-8a81-fb82fb0b5d0c",
-      name: "Walthour Road at Betz Creek",
-    },
-  ];
+import { ALL_SENSORS, SERIES_COLORS } from '../regions';
 
-  const MAX_SELECTION = 3;
-  const COMPARISON_COLORS = ["#2563eb", "#dc2626", "#16a34a"];
+const MAX_SELECTION = 3;
   
   function SensorSelector({ selectedIds, setSelectedIds }) {
     const handleToggle = (sensorId) => {
@@ -87,11 +37,11 @@ export const AVAILABLE_SENSORS = [
         </div>
   
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          {AVAILABLE_SENSORS.map(sensor => {
+          {ALL_SENSORS.map(sensor => {
             const selectedIndex = selectedIds.indexOf(sensor.id);
             const isChecked = selectedIndex !== -1;
             const isDisabled = !isChecked && selectedIds.length >= MAX_SELECTION;
-            const badgeColor = isChecked ? COMPARISON_COLORS[selectedIndex] : '#cbd5e1';
+            const badgeColor = isChecked ? SERIES_COLORS[selectedIndex] : '#cbd5e1';
   
             return (
               <label
