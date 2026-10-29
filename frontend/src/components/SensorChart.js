@@ -83,8 +83,8 @@ function SensorChart({ sensorIds, selectedRange }) {
       },
     },
     yaxis: {
-      title: { text: 'Stage (m)' },
-      decimalsInFloat: 2,
+      title: { text: 'Water Level (mm)' },
+      decimalsInFloat: 0,
     },
     tooltip: {
       shared: true,
@@ -109,7 +109,7 @@ function SensorChart({ sensorIds, selectedRange }) {
           const sensorName = sensors[idx]?.name || s.name;
           const rawVal = series[idx]?.[dataPointIndex];
 
-          const val = rawVal !== null && rawVal !== undefined ? rawVal.toFixed(2) : 'N/A';
+          const val = rawVal !== null && rawVal !== undefined ? `${rawVal.toFixed(0)} mm` : 'N/A';
 
           rowsHtml += `
             <div style="display: flex; align-items: center; margin-top: 4px; font-size: 13px;">
