@@ -2,7 +2,9 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import requests
-from datetime import datetime, timedelta
+import httpx
+import asyncio
+from datetime import datetime
 from dotenv import load_dotenv
 
 ## API Doc: https://docs.greenstream.cloud/
@@ -58,7 +60,7 @@ def get_water_level(id, start):
     params = {
         "id": id,
         "start": start,
-        "end": end
+        "end": end,
     }
 
     response = requests.get(f"{BASE_URL}/site/messages", headers=headers, params=params)
@@ -105,34 +107,57 @@ def three_water_level(idlist: list[str] = Query(...), start: int = Query(...)):
     }
 
 @app.get("/api/fetch_less_points")
-def fetch_less_points(idlist: list[str] = Query(...), start: int = Query(...)):
+async def fetch_less_points(idlist: list[str] = Query(...), start: int = Query(...)):
     end = int(datetime.now().timestamp())
-    multiple_stages = []
-    multiple_dates = []
-
-    for id in idlist:
-        params = {
-        "id": id,
-        "start": start,
-        "end": end
-        }
-
-        response = requests.get(f"{BASE_URL}/site/messages", headers=headers, params=params)
-        messages = response.json()
-        stage_list = []
-        event_date_list = []
-        for message in messages:
-            event_date = message.get('eventDate')
-            senix = message.get('senix')
-
-            dt = datetime.fromisoformat(event_date.replace("Z", "+00:00"))
-            if dt.minute == 0:
-                stage_list.append(sensor_elevation[params["id"]] - senix['mm'])
-                event_date_list.append(event_date)
-
-        multiple_stages.append(stage_list)
-        multiple_dates.append(event_date_list)
     
+
+    # Dividing time into 3-day chunks since my assumption is that the endpoint allows to fectch the maximum of 3 days.
+    # This is because when I pulled 1 week of data, it only fetched 3 days of data.
+    CHUNK_SECONDS = 3 * 24 * 60 * 60
+    intervals = []
+    curr = start
+    while curr < end:
+        intervals.append((curr, min(curr + CHUNK_SECONDS, end)))
+        curr += CHUNK_SECONDS
+
+    # Timeout configuration since the default timeout (5 seconds) crashed the endpoint.
+    # This is just a bandage. After some trials, we can get rid of this or shorten the timeout since it might affect performance.
+    timeout_config = httpx.Timeout(30.0, connect=10.0)
+    limits_config = httpx.Limits(max_keepalive_connections=20, max_connections=50)
+
+    # Parallel Async clients 
+    async with httpx.AsyncClient(timeout=timeout_config, limits=limits_config) as client:
+        multiple_stages = []
+        multiple_dates = []
+
+        for sensor_id in idlist:
+            tasks = [
+                client.get(
+                    f"{BASE_URL}/site/messages",
+                    headers=headers,
+                    params={"id": sensor_id, "start": s, "end": e}
+                )
+                for s, e in intervals
+            ]
+            # Parallel requests. return_exceptions prevents one slow chunk to crash the endpoint
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            stage_list = []
+            event_date_list = []
+
+            for res in results:
+                for msg in res.json():
+                    event_date = msg.get('eventDate')
+
+                    # Hourly data
+                    if event_date and event_date[14:16] == '00':
+                        senix = msg.get('senix', {})
+                        stage_list.append(sensor_elevation[sensor_id] - senix.get('mm'))
+                        event_date_list.append(event_date)
+
+            multiple_stages.append(stage_list)
+            multiple_dates.append(event_date_list)
+
     return {
         "ids": idlist,
         "stages": multiple_stages,
