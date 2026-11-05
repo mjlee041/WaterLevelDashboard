@@ -4,6 +4,7 @@ import { TIME_RANGES } from './TimeRangeSelector';
 import { ALL_SENSORS, SERIES_COLORS } from '../regions';
 
 const API_URL = 'http://127.0.0.1:8000/api/three_water_level';
+const LESS_FETCH_URL = 'http://127.0.0.1:8000/api/fetch_less_points';
 
 function SensorChart({ sensorIds, selectedRange }) {
   const [series, setSeries] = useState([]);
@@ -23,8 +24,15 @@ function SensorChart({ sensorIds, selectedRange }) {
       const startTimestamp = Math.floor(Date.now() / 1000) - rangeConfig.seconds;
 
       const queryParams = ids.map(id => `idlist=${encodeURIComponent(id)}`).join('&');
-      const url = `${API_URL}?${queryParams}&start=${startTimestamp}`;
 
+      let url;
+
+      if (['1h', '6h', '12h', '24h', '2d', '3d'].includes(rangeConfig.value)) {
+        url = `${API_URL}?${queryParams}&start=${startTimestamp}`;
+      } else {
+        url = `${LESS_FETCH_URL}?${queryParams}&start=${startTimestamp}`;
+      }
+    
       setLoading(true);
       setError(null);
       try {

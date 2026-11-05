@@ -7,6 +7,10 @@ export const TIME_RANGES = [
   { label: '24 Hours', value: '24h', seconds: 24 * 60 * 60 },
   { label: '2 Days', value: '2d', seconds: 2 * 24 * 60 * 60 },
   { label: '3 Days', value: '3d', seconds: 3 * 24 * 60 * 60 },
+  { label: '1 Week', value: '1w', seconds: 7 * 24 * 60 * 60 },
+  { label: '2 Weeks', value: '2w', seconds: 2 * 7 * 24 * 60 * 60 },
+  { label: '3 Weeks', value: '3w', seconds: 3 * 7 * 24 * 60 * 60 },
+  { label: '1 Month', value: '1m', seconds: 30 * 24 * 60 * 60 }
 ];
 
 function TimeRangeSelector({ selectedRange, setSelectedRange }) {
