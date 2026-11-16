@@ -1,6 +1,12 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import os
+import sys
+import threading
+import webbrowser
+import uvicorn
 import requests
 import httpx
 import asyncio
@@ -8,6 +14,36 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 ## API Doc: https://docs.greenstream.cloud/
+
+# Helper to find bundled files when packaged with PyInstaller
+def get_resource_path(relative_path: str) -> str:
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+# Folder where the executable (or api.py during dev) lives
+APP_DIR = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.abspath(".")
+CONFIG_FILE = os.path.join(APP_DIR, "config.txt")
+ENV_FILE = os.path.join(APP_DIR, ".env")
+
+# Load from config.txt or .env if present
+if os.path.exists(CONFIG_FILE):
+    load_dotenv(CONFIG_FILE)
+elif os.path.exists(ENV_FILE):
+    load_dotenv(ENV_FILE)
+
+API_KEY = os.getenv("GREAN_STREAM_API_KEY")
+
+# If no key is found, prompt the user once in the terminal and save it
+if not API_KEY:
+    print("=" * 55)
+    print("FIRST-TIME SETUP: GreenStream API Key Required")
+    print("=" * 55)
+    API_KEY = input("Paste your GreenStream API key and press Enter: ").strip()
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        f.write(f"GREAN_STREAM_API_KEY={API_KEY}\n")
+    print(f"\nSaved! Your key is stored in: {CONFIG_FILE}")
+    print("You will not need to enter it again.\n")
 
 app = FastAPI()
 
@@ -23,9 +59,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-load_dotenv()
-
-API_KEY = os.getenv("GREAN_STREAM_API_KEY")
 BASE_URL = "https://api.greenstream.cloud"
 
 headers = {
@@ -164,3 +197,33 @@ async def fetch_less_points(idlist: list[str] = Query(...), start: int = Query(.
         "stages": multiple_stages,
         "dates": multiple_dates
     }
+
+# SERVE COMPILED REACT FRONTEND (MUST REMAIN AT THE BOTTOM)
+
+BUILD_DIR = get_resource_path("build")
+
+if os.path.exists(os.path.join(BUILD_DIR, "static")):
+    app.mount("/static", StaticFiles(directory=os.path.join(BUILD_DIR, "static")), name="static")
+elif os.path.exists(os.path.join(BUILD_DIR, "assets")):
+    app.mount("/assets", StaticFiles(directory=os.path.join(BUILD_DIR, "assets")), name="assets")
+
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    file_path = os.path.join(BUILD_DIR, full_path)
+    if full_path and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    index_path = os.path.join(BUILD_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"error": "Frontend build folder not found. Run 'npm run build' first."}
+
+
+def open_browser():
+    webbrowser.open("http://127.0.0.1:8000")
+
+
+if __name__ == "__main__":
+    print("Starting Water Level Dashboard...")
+    print("Keep this window open while using the dashboard. Close it to stop the app.")
+    threading.Timer(1.5, open_browser).start()
+    uvicorn.run(app, host="127.0.0.1", port=8000)
