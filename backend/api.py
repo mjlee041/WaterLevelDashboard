@@ -50,6 +50,7 @@ sensor_elevation = {
     "6c891fca-c758-470e-8a81-fb82fb0b5d0c": 3743,
     "33035148-e0aa-4323-a325-bffbb209518b": 3392,
     "d02977db-887c-49f3-9d4e-7420daea6886": 3463,
+    "ebc47950-2fdd-4664-9023-197407457f15": 3834,  # Catalina Drive at Sazarine Creek
 }
 
 

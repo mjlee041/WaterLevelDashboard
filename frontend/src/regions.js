@@ -36,6 +36,7 @@ export const REGIONS = [
       { id: '05b03e11-aea9-4d74-a4fa-dd9b557a8025', name: 'Turner Creek Boat Ramp' },
       { id: '6c891fca-c758-470e-8a81-fb82fb0b5d0c', name: 'Walthour Road at Betz Creek' },
       { id: '9cb2d88e-2b29-4b97-bf51-fc786bf06762', name: 'Tybee Island at Burton 4H Center' },
+      { id: 'ebc47950-2fdd-4664-9023-197407457f15', name: 'Catalina Drive at Sazarine Creek' },
     ],
   },
   {

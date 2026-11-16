@@ -16,6 +16,7 @@ const SITES = [
   { id: '867c5ecb-6b7b-4d78-8c11-933d71704df0', name: 'Herb River at La Roche Avenue' },
   { id: '9ad953f0-2259-47e4-9d16-f46fea05badc', name: 'Country Club Creek at Marine Science Center' },
   { id: '92279f85-e876-4f43-8e8b-38e36a213dd5', name: 'Kilkenny Creek' },
+  { id: 'ebc47950-2fdd-4664-9023-197407457f15', name: 'Catalina Drive at Sazarine Creek' },
 ]
 
 // One line color per selector slot; the dropdown swatch and chart trace share these.
