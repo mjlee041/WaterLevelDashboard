@@ -32,7 +32,7 @@ if os.path.exists(CONFIG_FILE):
 elif os.path.exists(ENV_FILE):
     load_dotenv(ENV_FILE)
 
-API_KEY = os.getenv("GREAN_STREAM_API_KEY")
+API_KEY = os.getenv("GREEN_STREAM_API_KEY")
 
 # If no key is found, prompt the user once in the terminal and save it
 if not API_KEY:
@@ -41,7 +41,7 @@ if not API_KEY:
     print("=" * 55)
     API_KEY = input("Paste your GreenStream API key and press Enter: ").strip()
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        f.write(f"GREAN_STREAM_API_KEY={API_KEY}\n")
+        f.write(f"GREEN_STREAM_API_KEY={API_KEY}\n")
     print(f"\nSaved! Your key is stored in: {CONFIG_FILE}")
     print("You will not need to enter it again.\n")
 
